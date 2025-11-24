@@ -1,13 +1,27 @@
 import { useMemo, useState } from "react";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { DashboardHeader } from "../components/DashboardHeader";
 import { Sidebar } from "../components/Sidebar";
 import { DashboardOverview } from "../components/DashboardOverview";
 import { ProductsView } from "../components/ProductsView";
 import { OrdersView } from "../components/OrdersView";
+import Customers from "./Customers";
+import Analytics from "./Analytics";
+import Categories from "./Categories";
+import { SettingsPage } from "../components/ui/SettingsPage";
 import type { DashboardStats, Order, Product } from "../types";
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // derive active tab from current admin path (e.g. /admin/customers -> 'customers')
+  const subpath =
+    location.pathname === "/admin" || location.pathname === "/admin/"
+      ? ""
+      : location.pathname.replace(/^\/admin\//, "");
+  const activeTab = subpath.split("/")[0] || "dashboard";
 
   const products = useMemo<Product[]>(
     () => [
@@ -146,36 +160,56 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader />
+      <DashboardHeader onOpenSidebar={() => setMobileSidebarOpen(true)} />
       <div className="flex">
-        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        <div className="flex-1 p-6">
-          {activeTab === "dashboard" && (
-            <DashboardOverview
-              stats={stats}
-              recentOrders={orders}
-              lowStockProducts={lowStockProducts}
+        <Sidebar
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            // navigate to the corresponding admin sub-route
+            if (tab === "dashboard") navigate("/admin");
+            else navigate(`/admin/${tab}`);
+            setMobileSidebarOpen(false);
+          }}
+          mobileOpen={mobileSidebarOpen}
+          onClose={() => setMobileSidebarOpen(false)}
+        />
+        <div className="flex-1 p-4 md:p-6">
+          <Routes>
+            <Route
+              index
+              element={
+                <DashboardOverview
+                  stats={stats}
+                  recentOrders={orders}
+                  lowStockProducts={lowStockProducts}
+                />
+              }
             />
-          )}
-
-          {activeTab === "products" && (
-            <ProductsView
-              products={products}
-              onAddProduct={() => {}}
-              onEditProduct={() => {}}
-              onDeleteProduct={() => {}}
+            <Route
+              path="products"
+              element={
+                <ProductsView
+                  products={products}
+                  onAddProduct={() => {}}
+                  onEditProduct={() => {}}
+                  onDeleteProduct={() => {}}
+                />
+              }
             />
-          )}
-
-          {activeTab === "orders" && (
-            <OrdersView
-              orders={orders}
-              onUpdateOrderStatus={() => {}}
+            <Route
+              path="orders"
+              element={
+                <OrdersView orders={orders} onUpdateOrderStatus={() => {}} />
+              }
             />
-          )}
+            <Route path="customers" element={<Customers />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="*" element={<div>Admin page not found</div>} />
+          </Routes>
         </div>
       </div>
     </div>
   );
 }
-

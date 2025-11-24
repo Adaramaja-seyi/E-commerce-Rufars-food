@@ -22,7 +22,7 @@ function AppLayout() {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/*" element={<Admin />} />
         </Routes>
       </main>
       {!isAdmin && <Footer />}

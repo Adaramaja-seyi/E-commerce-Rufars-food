@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Search, Eye } from 'lucide-react';
-import { Input } from './ui/input';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
+import { useState } from "react";
+import { Search, Eye } from "lucide-react";
+import { Input } from "./ui/input";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import {
   Table,
   TableBody,
@@ -10,25 +10,25 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from './ui/table';
+} from "./ui/table";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
-import { Order } from '../types';
-import { OrderDetailsDialog } from './OrderDetailsDialog';
+} from "./ui/select";
+import { Order } from "../types";
+import { OrderDetailsDialog } from "./OrderDetailsDialog";
 
 interface OrdersViewProps {
   orders: Order[];
-  onUpdateOrderStatus: (orderId: string, status: Order['status']) => void;
+  onUpdateOrderStatus: (orderId: string, status: Order["status"]) => void;
 }
 
 export function OrdersView({ orders, onUpdateOrderStatus }: OrdersViewProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const filteredOrders = orders.filter((order) => {
@@ -37,23 +37,24 @@ export function OrdersView({ orders, onUpdateOrderStatus }: OrdersViewProps) {
       order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.customer.email.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || order.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusColor = (status: Order['status']) => {
+  const getStatusColor = (status: Order["status"]) => {
     switch (status) {
-      case 'delivered':
-        return 'default';
-      case 'shipped':
-        return 'secondary';
-      case 'processing':
-        return 'outline';
-      case 'pending':
-        return 'outline';
-      case 'cancelled':
-        return 'destructive';
+      case "delivered":
+        return "default";
+      case "shipped":
+        return "secondary";
+      case "processing":
+        return "outline";
+      case "pending":
+        return "outline";
+      case "cancelled":
+        return "destructive";
     }
   };
 
@@ -66,7 +67,10 @@ export function OrdersView({ orders, onUpdateOrderStatus }: OrdersViewProps) {
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={18}
+          />
           <Input
             placeholder="Search orders..."
             value={searchQuery}
@@ -89,7 +93,8 @@ export function OrdersView({ orders, onUpdateOrderStatus }: OrdersViewProps) {
         </Select>
       </div>
 
-      <div className="bg-white rounded-lg border">
+      {/* Desktop / tablet table */}
+      <div className="hidden md:block bg-white rounded-lg border p-4">
         <Table>
           <TableHeader>
             <TableRow>
@@ -104,23 +109,32 @@ export function OrdersView({ orders, onUpdateOrderStatus }: OrdersViewProps) {
           <TableBody>
             {filteredOrders.map((order) => (
               <TableRow key={order.id}>
-                <TableCell className="text-gray-900">{order.orderNumber}</TableCell>
+                <TableCell className="text-gray-900">
+                  {order.orderNumber}
+                </TableCell>
                 <TableCell>
                   <div>
                     <p className="text-gray-900">{order.customer.name}</p>
-                    <p className="text-sm text-gray-600">{order.customer.email}</p>
+                    <p className="text-sm text-gray-600">
+                      {order.customer.email}
+                    </p>
                   </div>
                 </TableCell>
                 <TableCell className="text-gray-600">
-                  {new Date(order.createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
+                  {new Date(order.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
                   })}
                 </TableCell>
-                <TableCell className="text-gray-900">${order.total.toFixed(2)}</TableCell>
+                <TableCell className="text-gray-900">
+                  ${order.total.toFixed(2)}
+                </TableCell>
                 <TableCell>
-                  <Badge variant={getStatusColor(order.status)} className="capitalize">
+                  <Badge
+                    variant={getStatusColor(order.status)}
+                    className="capitalize"
+                  >
                     {order.status}
                   </Badge>
                 </TableCell>
@@ -138,6 +152,48 @@ export function OrdersView({ orders, onUpdateOrderStatus }: OrdersViewProps) {
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile list view */}
+      <div className="block md:hidden space-y-4">
+        {filteredOrders.map((order) => (
+          <div key={order.id} className="bg-white rounded-lg border p-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Order</p>
+                <p className="text-gray-900 font-medium">{order.orderNumber}</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {order.customer.name} • {order.customer.email}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-gray-900 font-semibold">
+                  ${order.total.toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between">
+              <Badge
+                variant={getStatusColor(order.status)}
+                className="capitalize"
+              >
+                {order.status}
+              </Badge>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedOrder(order)}
+                >
+                  View
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {selectedOrder && (

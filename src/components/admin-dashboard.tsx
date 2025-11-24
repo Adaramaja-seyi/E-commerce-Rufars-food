@@ -195,7 +195,7 @@ export function AdminDashboard() {
         </div>
 
         {/* Products Table */}
-        <div className="bg-white rounded-lg border border-border overflow-hidden">
+        <div className="bg-white rounded-lg border border-border overflow-x-auto">
           <table className="w-full">
             <thead className="bg-background border-b border-border">
               <tr>
