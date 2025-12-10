@@ -178,7 +178,7 @@ export function ShoppingCart() {
             )}
 
             <div className="space-y-3">
-              <Link to="/checkout" className="w-full">
+              <Link to="/signup" className="w-full">
                 <Button className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
                   Proceed to Checkout
                 </Button>

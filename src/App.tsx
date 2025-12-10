@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import { Header } from "./components/header";
 import { Footer } from "./components/footer";
 import Home from "./pages/home";
@@ -7,6 +12,8 @@ import ProductDetail from "./pages/product-detail";
 import Cart from "./pages/cart";
 import Checkout from "./pages/checkout";
 import Admin from "./pages/admin";
+import Login from "./pages/login";
+import Signup from "./pages/signup";
 
 function AppLayout() {
   const location = useLocation();
@@ -23,6 +30,8 @@ function AppLayout() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin/*" element={<Admin />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
         </Routes>
       </main>
       {!isAdmin && <Footer />}

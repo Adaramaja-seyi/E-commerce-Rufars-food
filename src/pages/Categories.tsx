@@ -87,6 +87,10 @@ const categories = [
 
 export default function Categories() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [modalType, setModalType] = useState<"edit" | "view" | "delete" | null>(
+    null
+  );
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   return (
     <div className="space-y-6">
@@ -207,12 +211,30 @@ export default function Categories() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setModalType("edit");
+                    }}
+                  >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Category
                   </DropdownMenuItem>
-                  <DropdownMenuItem>View Products</DropdownMenuItem>
-                  <DropdownMenuItem className="text-red-600">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setModalType("view");
+                    }}
+                  >
+                    View Products
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-red-600"
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setModalType("delete");
+                    }}
+                  >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete Category
                   </DropdownMenuItem>
@@ -247,6 +269,126 @@ export default function Categories() {
           </div>
         ))}
       </div>
+      {/* Modals for Edit, View, Delete */}
+      <Dialog
+        open={!!modalType}
+        onOpenChange={() => {
+          setModalType(null);
+          setSelectedCategory(null);
+        }}
+      >
+        <DialogContent>
+          {modalType === "edit" && selectedCategory && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Edit Category</DialogTitle>
+                <DialogDescription>
+                  Edit details for {selectedCategory.name}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">Category Name</Label>
+                  <Input id="edit-name" defaultValue={selectedCategory.name} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-slug">Slug</Label>
+                  <Input id="edit-slug" defaultValue={selectedCategory.slug} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea
+                    id="edit-description"
+                    defaultValue={selectedCategory.description}
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setModalType(null);
+                    setSelectedCategory(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-orange-500 hover:bg-orange-600"
+                  onClick={() => {
+                    setModalType(null);
+                    setSelectedCategory(null);
+                  }}
+                >
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+          {modalType === "view" && selectedCategory && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Products in {selectedCategory.name}</DialogTitle>
+                <DialogDescription>
+                  View all products for this category.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <p>
+                  <strong>Products count:</strong> {selectedCategory.products}
+                </p>
+                {/* You can map products here if you have product data */}
+                <p className="mt-2 text-gray-600">
+                  (Product details would be shown here.)
+                </p>
+              </div>
+              <DialogFooter>
+                <Button
+                  className="bg-orange-500 hover:bg-orange-600"
+                  onClick={() => {
+                    setModalType(null);
+                    setSelectedCategory(null);
+                  }}
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+          {modalType === "delete" && selectedCategory && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Delete Category</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete{" "}
+                  <strong>{selectedCategory.name}</strong>?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setModalType(null);
+                    setSelectedCategory(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                  onClick={() => {
+                    setModalType(null);
+                    setSelectedCategory(null);
+                  }}
+                >
+                  Delete
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

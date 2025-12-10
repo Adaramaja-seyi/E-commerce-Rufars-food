@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Edit, Trash2, MoreVertical } from "lucide-react";
+import { Plus, Search, Edit, Trash2, MoreVertical, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
@@ -19,14 +19,6 @@ import {
 } from "./ui/dropdown-menu";
 import { Product } from "../types";
 import { ProductDialog } from "./ProductDialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "./ui/dialog";
 
 interface ProductsViewProps {
   products: Product[];
@@ -44,8 +36,7 @@ export function ProductsView({
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   const filteredProducts = products.filter(
     (product) =>
@@ -76,6 +67,11 @@ export function ProductsView({
     handleDialogClose();
   };
 
+  const handleConfirmDelete = (productId: string) => {
+    onDeleteProduct(productId);
+    setProductToDelete(null);
+  };
+
   const getStatusColor = (status: Product["status"]) => {
     switch (status) {
       case "active":
@@ -86,6 +82,8 @@ export function ProductsView({
         return "destructive";
     }
   };
+
+  const productBeingDeleted = products.find((p) => p.id === productToDelete);
 
   return (
     <div className="space-y-6">
@@ -184,10 +182,7 @@ export function ProductsView({
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => {
-                          setDeleteProduct(product);
-                          setIsDeleteDialogOpen(true);
-                        }}
+                        onClick={() => setProductToDelete(product.id)}
                         className="text-red-600"
                       >
                         <Trash2 size={16} className="mr-2" />
@@ -266,10 +261,7 @@ export function ProductsView({
                   size="sm"
                   className="text-red-600 w-full sm:w-auto"
                   variant="ghost"
-                  onClick={() => {
-                    setDeleteProduct(product);
-                    setIsDeleteDialogOpen(true);
-                  }}
+                  onClick={() => setProductToDelete(product.id)}
                 >
                   Delete
                 </Button>
@@ -287,38 +279,135 @@ export function ProductsView({
       />
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Product</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete{" "}
-              <strong>{deleteProduct?.name}</strong>? This action cannot be
-              undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="bg-red-600 hover:bg-red-700 text-white"
-              onClick={() => {
-                if (deleteProduct) {
-                  onDeleteProduct(deleteProduct.id);
-                }
-                setIsDeleteDialogOpen(false);
-                setDeleteProduct(null);
+      {productToDelete && productBeingDeleted && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            pointerEvents: "auto",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "8px",
+              padding: "24px",
+              maxWidth: "420px",
+              width: "100%",
+              margin: "0 16px",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+              position: "relative",
+              zIndex: 10000,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
               }}
             >
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <h2
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "600",
+                  margin: 0,
+                  color: "#1f2937",
+                }}
+              >
+                Delete Product
+              </h2>
+              <button
+                onClick={() => setProductToDelete(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                  color: "#6b7280",
+                }}
+                onMouseEnter={(e) =>
+                  ((e.target as HTMLElement).style.color = "#1f2937")
+                }
+                onMouseLeave={(e) =>
+                  ((e.target as HTMLElement).style.color = "#6b7280")
+                }
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <p style={{ color: "#6b7280", marginBottom: "24px", margin: 0 }}>
+              Are you sure you want to delete{" "}
+              <strong style={{ color: "#1f2937" }}>
+                {productBeingDeleted.name}
+              </strong>
+              ? This action cannot be undone.
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                justifyContent: "flex-end",
+                marginTop: "24px",
+              }}
+            >
+              <button
+                onClick={() => setProductToDelete(null)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "4px",
+                  border: "1px solid #d1d5db",
+                  backgroundColor: "white",
+                  color: "#1f2937",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = "#f3f4f6";
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = "white";
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleConfirmDelete(productToDelete)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "4px",
+                  border: "none",
+                  backgroundColor: "#dc2626",
+                  color: "white",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = "#b91c1c";
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = "#dc2626";
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

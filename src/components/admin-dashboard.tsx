@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit2, Trash2, LogOut } from "lucide-react";
+import { Plus, Edit2, Trash2, LogOut, X } from "lucide-react";
 import { Button } from "../ui/button";
 
 interface Product {
@@ -34,6 +34,7 @@ export function AdminDashboard() {
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -58,6 +59,7 @@ export function AdminDashboard() {
 
   const handleDeleteProduct = (id: string) => {
     setProducts(products.filter((p) => p.id !== id));
+    setProductToDelete(null);
   };
 
   const handleEditProduct = (product: Product) => {
@@ -238,7 +240,14 @@ export function AdminDashboard() {
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleDeleteProduct(product.id)}
+                      onClick={(e) => {
+                        console.log(
+                          "Delete button clicked, product.id:",
+                          product.id
+                        );
+                        e.stopPropagation();
+                        setProductToDelete(product.id);
+                      }}
                       className="p-2 hover:bg-destructive/10 rounded text-destructive"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -270,6 +279,80 @@ export function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Delete Modal Portal - Outside main content */}
+      {productToDelete && (
+        <>
+          {console.log("Rendering modal for product:", productToDelete)}
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9999,
+              pointerEvents: "auto",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "white",
+                borderRadius: "8px",
+                padding: "24px",
+                maxWidth: "420px",
+                width: "100%",
+                margin: "0 16px",
+                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+                position: "relative",
+                zIndex: 10000,
+              }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Delete Product
+                </h2>
+                <button
+                  onClick={() => setProductToDelete(null)}
+                  className="text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-muted-foreground mb-6">
+                Are you sure you want to delete{" "}
+                <strong>
+                  {products.find((p) => p.id === productToDelete)?.name}
+                </strong>
+                ? This action cannot be undone.
+              </p>
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => setProductToDelete(null)}
+                  className="px-4 py-2 rounded border border-border hover:bg-background text-foreground cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    console.log("Delete confirmed for:", productToDelete);
+                    if (productToDelete) {
+                      handleDeleteProduct(productToDelete);
+                    }
+                  }}
+                  className="px-4 py-2 rounded bg-destructive hover:bg-destructive/90 text-white cursor-pointer"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
